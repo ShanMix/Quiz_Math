@@ -200,7 +200,7 @@ document.getElementById("startBtn").onclick = function(){
 // GENERATE RANDOM QUESTION
 function generateQuestion(){
     const num1 = Math.floor(Math.random() * 20) + 1;
-    const num2 = Math.floor(Math.random() * 20) + 1;
+    const num2 = Math.floor(Math.random() * 10) + 1;
     const operators = ["+","-","*","/"];
     const operator = operators[Math.floor(Math.random()*4)];
 
@@ -342,5 +342,6 @@ function resetGame(){
 
 </body>
 </html>
+
 
 
