@@ -133,7 +133,7 @@ button{
     <div class="dashboard">
         <div>Player: <span id="displayName"></span></div>
         <div>Score: <span id="score">0</span></div>
-        <div>Time: <span id="time" class="timer">10</span>s</div>
+        <div>Time: <span id="time" class="timer">15</span>s</div>
         <div>Correct: <span id="correct">0</span></div>
         <div>Wrong: <span id="wrong">0</span></div>
         <div>Accuracy: <span id="accuracy">0</span>%</div>
@@ -176,7 +176,7 @@ let correctCount = 0;
 let wrongCount = 0;
 let score = 0;
 let currentAnswer = 0;
-let timeLeft = 10;
+let timeLeft = 15;
 let timer;
 
 // START QUIZ
@@ -217,7 +217,7 @@ function generateQuestion(){
 
 // TIMER
 function startTimer(){
-    timeLeft = 10;
+    timeLeft = 15;
     document.getElementById("time").textContent = timeLeft;
 
     timer = setInterval(()=>{
@@ -331,7 +331,7 @@ function resetGame(){
     correctCount = 0;
     wrongCount = 0;
     score = 0;
-    timeLeft = 10;
+    timeLeft = 15;
 
     updateDashboard();
     document.getElementById("feedback").textContent = "";
@@ -342,3 +342,4 @@ function resetGame(){
 
 </body>
 </html>
+
