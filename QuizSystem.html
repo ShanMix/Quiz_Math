@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Math Quiz Dashboard</title>
+
+<style>
+body{
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to right, #4facfe, #00f2fe);
+    margin:0;
+    padding:0;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+.container{
+    background:white;
+    width:900px;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.2);
+}
+
+h1{
+    text-align:center;
+}
+
+.dashboard{
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    margin-bottom:20px;
+    background:#f4f4f4;
+    padding:10px;
+    border-radius:8px;
+    font-size:14px;
+}
+
+.question-area{
+    text-align:center;
+    margin:20px 0;
+}
+
+#question{
+    font-size:28px;
+    font-weight:bold;
+}
+
+input{
+    padding:10px;
+    font-size:18px;
+    width:200px;
+    text-align:center;
+}
+
+button{
+    padding:10px 20px;
+    font-size:16px;
+    cursor:pointer;
+    border:none;
+    border-radius:5px;
+    margin-top:10px;
+}
+
+#submitBtn{
+    background:#28a745;
+    color:white;
+}
+
+#startBtn{
+    background:#007bff;
+    color:white;
+}
+
+.feedback{
+    margin-top:10px;
+    font-weight:bold;
+}
+
+.correct{ color:green; }
+.wrong{ color:red; }
+
+.summary{
+    display:none;
+    margin-top:20px;
+    background:#f8f8f8;
+    padding:15px;
+    border-radius:8px;
+    text-align:center;
+}
+
+.timer{
+    font-weight:bold;
+    color:red;
+}
+
+.progress-bar{
+    width:100%;
+    height:10px;
+    background:#ddd;
+    border-radius:5px;
+    margin-top:5px;
+}
+
+.progress{
+    height:10px;
+    background:#28a745;
+    width:0%;
+    border-radius:5px;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>Math Quiz Dashboard</h1>
+
+<!-- START SCREEN -->
+<div id="startScreen">
+    <input type="text" id="playerName" placeholder="Enter your name">
+    <br><br>
+    <button id="startBtn">Start Quiz</button>
+</div>
+
+<!-- QUIZ SCREEN -->
+<div id="quizScreen" style="display:none;">
+
+    <div class="dashboard">
+        <div>Player: <span id="displayName"></span></div>
+        <div>Score: <span id="score">0</span></div>
+        <div>Time: <span id="time" class="timer">10</span>s</div>
+        <div>Correct: <span id="correct">0</span></div>
+        <div>Wrong: <span id="wrong">0</span></div>
+        <div>Accuracy: <span id="accuracy">0</span>%</div>
+        <div>Progress: <span id="progressText">0/10</span></div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress" id="progressBar"></div>
+    </div>
+
+    <div class="question-area">
+        <div id="question"></div>
+        <br>
+        <input type="number" id="answerInput">
+        <br>
+        <button id="submitBtn">Submit</button>
+        <div class="feedback" id="feedback"></div>
+    </div>
+
+</div>
+
+<!-- SUMMARY -->
+<div class="summary" id="summary">
+    <h2>Quiz Summary</h2>
+    <p id="summaryContent"></p>
+    <br>
+    <button id="retryBtn" style="background:#007bff; color:white;">
+        Retry Quiz
+    </button>
+</div>
+
+</div>
+
+<script>
+
+let player = "";
+let totalQuestions = 10;
+let currentQuestionIndex = 0;
+let correctCount = 0;
+let wrongCount = 0;
+let score = 0;
+let currentAnswer = 0;
+let timeLeft = 10;
+let timer;
+
+// START QUIZ
+document.getElementById("startBtn").onclick = function(){
+    player = document.getElementById("playerName").value;
+
+    if(player === ""){
+        alert("Please enter your name!");
+        return;
+    }
+
+    document.getElementById("displayName").textContent = player;
+    document.getElementById("startScreen").style.display = "none";
+    document.getElementById("quizScreen").style.display = "block";
+
+    resetGame();
+    generateQuestion();
+    startTimer();
+};
+
+// GENERATE RANDOM QUESTION
+function generateQuestion(){
+    const num1 = Math.floor(Math.random() * 20) + 1;
+    const num2 = Math.floor(Math.random() * 20) + 1;
+    const operators = ["+","-","*","/"];
+    const operator = operators[Math.floor(Math.random()*4)];
+
+    switch(operator){
+        case "+": currentAnswer = num1 + num2; break;
+        case "-": currentAnswer = num1 - num2; break;
+        case "*": currentAnswer = num1 * num2; break;
+        case "/": currentAnswer = parseFloat((num1 / num2).toFixed(2)); break;
+    }
+
+    document.getElementById("question").textContent =
+        num1 + " " + operator + " " + num2 + " = ?";
+}
+
+// TIMER
+function startTimer(){
+    timeLeft = 10;
+    document.getElementById("time").textContent = timeLeft;
+
+    timer = setInterval(()=>{
+        timeLeft--;
+        document.getElementById("time").textContent = timeLeft;
+
+        if(timeLeft <= 0){
+            clearInterval(timer);
+            handleWrong("Time's up!");
+        }
+    },1000);
+}
+
+// SUBMIT ANSWER
+document.getElementById("submitBtn").onclick = function(){
+    const userAnswer = parseFloat(document.getElementById("answerInput").value);
+    clearInterval(timer);
+
+    if(userAnswer === currentAnswer){
+        correctCount++;
+        score += 10 + timeLeft; // TIMER AFFECTS SCORE
+        showFeedback("Correct!", true);
+    } else {
+        wrongCount++;
+        showFeedback("Wrong!", false);
+    }
+
+    nextQuestion();
+};
+
+// HANDLE TIMEOUT
+function handleWrong(message){
+    wrongCount++;
+    showFeedback(message, false);
+    nextQuestion();
+}
+
+// FEEDBACK
+function showFeedback(message, isCorrect){
+    const feedback = document.getElementById("feedback");
+    feedback.textContent = message;
+    feedback.className = isCorrect ? "feedback correct" : "feedback wrong";
+}
+
+// NEXT QUESTION
+function nextQuestion(){
+    currentQuestionIndex++;
+    updateDashboard();
+
+    if(currentQuestionIndex >= totalQuestions){
+        endQuiz();
+        return;
+    }
+
+    setTimeout(()=>{
+        document.getElementById("feedback").textContent = "";
+        document.getElementById("answerInput").value = "";
+        generateQuestion();
+        startTimer();
+    },1000);
+}
+
+// UPDATE DASHBOARD (DYNAMIC VALUES)
+function updateDashboard(){
+    document.getElementById("score").textContent = score;
+    document.getElementById("correct").textContent = correctCount;
+    document.getElementById("wrong").textContent = wrongCount;
+    document.getElementById("progressText").textContent =
+        currentQuestionIndex + "/" + totalQuestions;
+
+    const accuracy = currentQuestionIndex === 0 ? 0 :
+        ((correctCount / currentQuestionIndex) * 100).toFixed(2);
+
+    document.getElementById("accuracy").textContent = accuracy;
+
+    const progressPercent = (currentQuestionIndex / totalQuestions) * 100;
+    document.getElementById("progressBar").style.width =
+        progressPercent + "%";
+}
+
+// END QUIZ
+function endQuiz(){
+    document.getElementById("quizScreen").style.display = "none";
+    document.getElementById("summary").style.display = "block";
+
+    const accuracy = ((correctCount / totalQuestions) * 100).toFixed(2);
+
+    document.getElementById("summaryContent").innerHTML = `
+        Player: ${player} <br>
+        Final Score: ${score} <br>
+        Correct Answers: ${correctCount} <br>
+        Wrong Answers: ${wrongCount} <br>
+        Accuracy: ${accuracy}% <br>
+        Correct vs Wrong Ratio: ${correctCount} : ${wrongCount}
+    `;
+}
+
+// RETRY QUIZ
+document.getElementById("retryBtn").onclick = function(){
+    document.getElementById("summary").style.display = "none";
+    document.getElementById("quizScreen").style.display = "block";
+
+    resetGame();
+    generateQuestion();
+    startTimer();
+};
+
+// RESET GAME STATE
+function resetGame(){
+    currentQuestionIndex = 0;
+    correctCount = 0;
+    wrongCount = 0;
+    score = 0;
+    timeLeft = 10;
+
+    updateDashboard();
+    document.getElementById("feedback").textContent = "";
+    document.getElementById("answerInput").value = "";
+}
+
+</script>
+
+</body>
+</html>
